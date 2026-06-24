@@ -41,18 +41,46 @@ const toNumber = (value) => Number(value) || 0;
 const getProvince = (record) => record.province || 'Unknown';
 
 /**
+ * -----------------------------
+ * Helper: Extract ISO date (YYYY-MM-DD)
+ * -----------------------------
+ */
+const getDateOnly = (dateTime) => {
+  if (!dateTime) return null;
+  return dateTime.split(' ')[0];
+};
+
+/**
+ * -----------------------------
+ * Helper: Check if date is within range
+ * -----------------------------
+ */
+const isDateInRange = (date, startDate, endDate) => {
+  if (!date || !startDate || !endDate) return false;
+
+  return date >= startDate && date <= endDate;
+};
+
+/**
  * ============================================================
  * Total Revenue by Province
  * ============================================================
  * Aggregates total_spent per province
  */
-export async function fetchTotalSpentByProvince() {
+export async function fetchTotalSpentByProvince(filters) {
+  const { startDate, endDate } = filters;
+
   const records = await fetchAndParseCSV();
+
+  // Filter records by date
+  const filteredRecords = records.filter((record) => {
+    const date = getDateOnly(record.transaction_date);
+    return isDateInRange(date, startDate, endDate);
+  });
 
   const totalsByProvince = new Map();
 
-  // Aggregate totals
-  records.forEach((record) => {
+  filteredRecords.forEach((record) => {
     const province = getProvince(record);
     const totalSpent = toNumber(record.total_spent);
 
@@ -60,11 +88,10 @@ export async function fetchTotalSpentByProvince() {
     totalsByProvince.set(province, currentTotal + totalSpent);
   });
 
-  // Convert to sorted array
   const provinces = Array.from(totalsByProvince.entries())
     .map(([province, totalSpent]) => ({
       province,
-      totalSpent: Math.round(totalSpent * 100) / 100, // round to 2 decimals
+      totalSpent: Math.round(totalSpent * 100) / 100,
     }))
     .sort((a, b) => b.totalSpent - a.totalSpent);
 
@@ -80,13 +107,19 @@ export async function fetchTotalSpentByProvince() {
  * ============================================================
  * Aggregates quantity per province
  */
-export async function fetchTotalQuantityByProvince() {
+export async function fetchTotalQuantityByProvince(filters) {
+  const { startDate, endDate } = filters;
+
   const records = await fetchAndParseCSV();
+
+  const filteredRecords = records.filter((record) => {
+    const date = getDateOnly(record.transaction_date);
+    return isDateInRange(date, startDate, endDate);
+  });
 
   const totalsByProvince = new Map();
 
-  // Aggregate quantities
-  records.forEach((record) => {
+  filteredRecords.forEach((record) => {
     const province = getProvince(record);
     const quantity = toNumber(record.quantity);
 
@@ -94,7 +127,6 @@ export async function fetchTotalQuantityByProvince() {
     totalsByProvince.set(province, currentTotal + quantity);
   });
 
-  // Convert to sorted array
   const provinces = Array.from(totalsByProvince.entries())
     .map(([province, totalQuantity]) => ({
       province,
@@ -115,29 +147,33 @@ export async function fetchTotalQuantityByProvince() {
  * Creates a nested structure:
  * province → item → total quantity
  */
-export async function fetchItemBreakdownByProvince() {
+export async function fetchItemBreakdownByProvince(filters) {
+  const { startDate, endDate } = filters;
+
   const records = await fetchAndParseCSV();
+
+  const filteredRecords = records.filter((record) => {
+    const date = getDateOnly(record.transaction_date);
+    return isDateInRange(date, startDate, endDate);
+  });
 
   const provinceMap = new Map();
 
-  records.forEach((record) => {
+  filteredRecords.forEach((record) => {
     const province = getProvince(record);
     const item = record.item || 'Unknown';
     const quantity = toNumber(record.quantity);
 
-    // Ensure province exists in map
     if (!provinceMap.has(province)) {
       provinceMap.set(province, new Map());
     }
 
     const itemMap = provinceMap.get(province);
 
-    // Add quantity to the correct item
     const currentItemQty = itemMap.get(item) || 0;
     itemMap.set(item, currentItemQty + quantity);
   });
 
-  // Convert nested map into clean array structure
   const provinces = Array.from(provinceMap.entries())
     .map(([province, itemMap]) => ({
       province,
@@ -146,9 +182,9 @@ export async function fetchItemBreakdownByProvince() {
           item,
           quantity,
         }))
-        .sort((a, b) => b.quantity - a.quantity), // sort items by most sold
+        .sort((a, b) => b.quantity - a.quantity),
     }))
-    .sort((a, b) => a.province.localeCompare(b.province)); // alphabetize provinces
+    .sort((a, b) => a.province.localeCompare(b.province));
 
   return {
     provinces,
@@ -163,34 +199,34 @@ export async function fetchItemBreakdownByProvince() {
  * Aggregates total_spent by date for each province.
  * Output is a time series per province.
  */
-export async function fetchSalesByDateByProvince() {
+export async function fetchSalesByDateByProvince(filters) {
+  const { startDate, endDate } = filters;
+
   const records = await fetchAndParseCSV();
+
+  const filteredRecords = records.filter((record) => {
+    const date = getDateOnly(record.transaction_date);
+    return isDateInRange(date, startDate, endDate);
+  });
 
   const provinceMap = new Map();
 
-  records.forEach((record) => {
+  filteredRecords.forEach((record) => {
     const province = getProvince(record);
 
-    // Extract only the date part (remove time)
-    const date = record.transaction_date
-      ? record.transaction_date.split(' ')[0]
-      : 'Unknown';
-
+    const date = getDateOnly(record.transaction_date);
     const totalSpent = toNumber(record.total_spent);
 
-    // Ensure province exists
     if (!provinceMap.has(province)) {
       provinceMap.set(province, new Map());
     }
 
     const dateMap = provinceMap.get(province);
 
-    // Add total spent for that date
     const currentTotal = dateMap.get(date) || 0;
     dateMap.set(date, currentTotal + totalSpent);
   });
 
-  // Convert nested maps into arrays
   const provinces = Array.from(provinceMap.entries())
     .map(([province, dateMap]) => ({
       province,
@@ -199,7 +235,7 @@ export async function fetchSalesByDateByProvince() {
           date,
           totalSpent: Math.round(totalSpent * 100) / 100,
         }))
-        .sort((a, b) => a.date.localeCompare(b.date)), // sort ascending by date
+        .sort((a, b) => a.date.localeCompare(b.date)),
     }))
     .sort((a, b) => a.province.localeCompare(b.province));
 
