@@ -120,6 +120,38 @@ date_clean = clean_text(df["Transaction Date"])
 df["Transaction Date"] = pd.to_datetime(date_clean, errors="coerce").dt.strftime("%Y-%m-%d")
 df["Transaction Date"] = df["Transaction Date"].replace({"NaT": np.nan})
 
+
+'''Fill Missing Values'''
+
+# Make sure Price Per Unit is numeric
+df["Price Per Unit"] = pd.to_numeric(df["Price Per Unit"], errors="coerce")
+
+# Fill missing Item values using Price Per Unit
+price_to_item = {
+    3.5: "Coffee",
+    5.0: "Refresher",
+    2.0: "Doughnut",
+    3.0: "Tea",
+    9.0: "Salad",
+    8.0: "Sandwich",
+    2.5: "Cookie",
+    4.5: "Juice"
+}
+
+df.loc[df["Item"].isna(), "Item"] = df.loc[df["Item"].isna(), "Price Per Unit"].map(price_to_item)
+
+
+# Find rows where Quantity is missing
+missing_quantity_rows = df["Quantity"].isna()
+
+# Fill missing Quantity using Total Spent / Price Per Unit
+df.loc[missing_quantity_rows, "Quantity"] = (
+    df.loc[missing_quantity_rows, "Total Spent"] /
+    df.loc[missing_quantity_rows, "Price Per Unit"]
+)
+
+df = df.fillna("Unknown")
+
 # 10. Check cleaned unique values
 print("Item unique values:")
 print(df["Item"].unique())
@@ -135,6 +167,5 @@ print(df["Location"].unique())
 
 print("\nMissing values after cleaning:")
 print(df.isna().sum())
-
 
 df.to_excel("Cleaned_CanAI_Cafe_Data.xlsx", index=False)
