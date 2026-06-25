@@ -134,6 +134,7 @@ export default function App() {
       }}
     >
       <ProvinceSidePanel
+        selectedDrink={selectedDrink}
         selectedProvinceId={selectedProvinceId}
         onProvinceChange={setSelectedProvinceId}
         monthRanges={monthRanges}

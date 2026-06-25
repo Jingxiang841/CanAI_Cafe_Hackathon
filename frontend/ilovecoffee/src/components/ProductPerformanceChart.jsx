@@ -23,7 +23,7 @@ export default function ProductPerformanceChart({ data }) {
         height: '100%',
         border: '1px solid var(--border)',
         backgroundColor: 'var(--surface)',
-        borderRadius: 2,
+        borderRadius: '14px',
         boxShadow: 'var(--shadow-sm)',
         animation: 'fadeSlideUp 0.5s ease both',
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -66,14 +66,56 @@ export default function ProductPerformanceChart({ data }) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <CartesianGrid strokeDasharray={gridDash} />
-              <XAxis dataKey={productPerformance.nameKey} />
-              <YAxis />
-              <Tooltip />
+
+              <XAxis
+                dataKey={productPerformance.nameKey}
+                tick={{
+                  fill: 'var(--text-muted)',
+                  fontWeight: 700,
+                }}
+                axisLine={{
+                  stroke: 'var(--border)',
+                }}
+                tickLine={false}
+              />
+
+              <YAxis
+                tick={{
+                  fill: 'var(--text-muted)',
+                  fontWeight: 700,
+                }}
+                axisLine={{
+                  stroke: 'var(--border)',
+                }}
+                tickLine={false}
+              />
+
+              <Tooltip
+                cursor={false}
+                contentStyle={{
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  color: 'var(--text-heading)',
+                  boxShadow: 'var(--shadow-md)',
+                  fontWeight: 700,
+                }}
+                labelStyle={{
+                  color: 'var(--text-heading)',
+                  fontWeight: 900,
+                }}
+              />
+
               <Bar
                 dataKey={productPerformance.valueKey}
                 name={productPerformance.barName}
                 fill="var(--chart-product)"
-                radius={[10, 10, 0, 0]}
+                radius={[8, 8, 0, 0]}
+                activeBar={{
+                  fill: 'var(--primary)',
+                  stroke: 'var(--primary-dark)',
+                  strokeWidth: 2,
+                }}
                 isAnimationActive
                 animationDuration={900}
                 animationEasing="ease-out"

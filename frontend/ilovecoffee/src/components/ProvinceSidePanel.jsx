@@ -18,16 +18,34 @@ import {
 
 import dashboardConfig from '../config/dashboardConfig';
 
+const fallbackColors = {
+  primary: '#8b572a',
+  primaryDark: '#5f3717',
+  primaryLight: '#fff3e6',
+  primarySoft: '#f0dcc6',
+  surface: '#fffaf3',
+  surfaceSoft: '#f8ead8',
+  border: '#d7b38e',
+  textHeading: '#2f1d10',
+  textMain: '#5d3d24',
+  textMuted: '#7d6652',
+  shadow: 'rgba(75, 46, 31, 0.2)',
+};
+
 export default function ProvinceSidePanel({
+  selectedDrink,
   selectedProvinceId,
   onProvinceChange,
   monthRanges,
   onMonthRangeChange,
 }) {
   const closeTimerRef = useRef(null);
+  const isSelectOpenRef = useRef(false);
 
   const [hoveredItem, setHoveredItem] = useState(null);
   const [anchorElement, setAnchorElement] = useState(null);
+
+  const selectedColors = selectedDrink?.colors || fallbackColors;
 
   const openMonthPanel = (item, element) => {
     if (closeTimerRef.current) {
@@ -39,16 +57,29 @@ export default function ProvinceSidePanel({
   };
 
   const scheduleCloseMonthPanel = () => {
+    if (isSelectOpenRef.current) {
+      return;
+    }
+
     closeTimerRef.current = setTimeout(() => {
       setHoveredItem(null);
       setAnchorElement(null);
-    }, 160);
+    }, 180);
   };
 
   const keepMonthPanelOpen = () => {
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
     }
+  };
+
+  const handleSelectOpen = () => {
+    isSelectOpenRef.current = true;
+    keepMonthPanelOpen();
+  };
+
+  const handleSelectClose = () => {
+    isSelectOpenRef.current = false;
   };
 
   const getAvailableEndMonths = (itemId) => {
@@ -132,77 +163,120 @@ export default function ProvinceSidePanel({
     width: 280,
     p: 2,
     borderRadius: '10px',
-    border: '1px solid var(--border)',
-    background:
-      'linear-gradient(145deg, var(--surface) 0%, var(--surface-soft) 100%)',
-    boxShadow: 'var(--shadow-md)',
+    border: `1px solid ${selectedColors.border}`,
+    background: `linear-gradient(145deg, ${selectedColors.surface} 0%, ${selectedColors.surfaceSoft} 100%)`,
+    boxShadow: `0 14px 34px ${selectedColors.shadow}`,
     animation: 'softPop 0.2s ease both',
   };
 
   const monthSelectStyles = {
     borderRadius: '8px',
-    backgroundColor: 'var(--surface)',
-    color: 'var(--text-heading)',
+    backgroundColor: selectedColors.surface,
+    color: selectedColors.textHeading,
 
     '& .MuiSelect-select': {
       fontWeight: 800,
-      color: 'var(--text-heading)',
+      color: selectedColors.textHeading,
     },
 
     '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'var(--border)',
+      borderColor: selectedColors.border,
     },
 
     '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'var(--primary)',
+      borderColor: selectedColors.primary,
     },
 
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'var(--primary)',
+      borderColor: selectedColors.primary,
       borderWidth: '1px',
     },
 
     '& .MuiSvgIcon-root': {
-      color: 'var(--primary)',
+      color: selectedColors.primary,
     },
   };
 
   const monthInputLabelStyles = {
-    color: 'var(--text-muted)',
+    color: selectedColors.textMuted,
     fontWeight: 700,
 
     '&.Mui-focused': {
-      color: 'var(--primary)',
+      color: selectedColors.primary,
     },
   };
 
   const monthSelectMenuProps = {
-    disablePortal: true,
+    disablePortal: false,
+    disableScrollLock: true,
+    anchorOrigin: {
+      vertical: 'bottom',
+      horizontal: 'left',
+    },
+    transformOrigin: {
+      vertical: 'top',
+      horizontal: 'left',
+    },
     PaperProps: {
       sx: {
         mt: 0.75,
-        borderRadius: '8px',
-        border: '1px solid var(--border)',
-        backgroundColor: 'var(--surface)',
-        color: 'var(--text-heading)',
-        boxShadow: 'var(--shadow-md)',
+        borderRadius: '10px',
+        border: `1px solid ${selectedColors.border}`,
+        background: `linear-gradient(180deg, ${selectedColors.surface} 0%, ${selectedColors.primaryLight} 100%)`,
+        color: selectedColors.textHeading,
+        boxShadow: `0 14px 34px ${selectedColors.shadow}`,
+        maxHeight: 300,
+        overflow: 'auto',
+
+        '& .MuiMenu-list': {
+          py: 0.75,
+          backgroundColor: 'transparent',
+        },
 
         '& .MuiMenuItem-root': {
-          fontWeight: 700,
-          color: 'var(--text-heading)',
-          borderRadius: '6px',
           mx: 0.75,
           my: 0.25,
+          borderRadius: '7px',
+          fontWeight: 800,
+          color: selectedColors.textHeading,
+          backgroundColor: 'transparent',
+          transition:
+            'background-color 0.18s ease, color 0.18s ease, transform 0.18s ease',
         },
 
         '& .MuiMenuItem-root:hover': {
-          backgroundColor: 'var(--primary-light)',
+          backgroundColor: selectedColors.primaryLight,
+          color: selectedColors.primaryDark,
+          transform: 'translateX(2px)',
         },
 
-        '& .Mui-selected': {
-          backgroundColor: 'var(--primary-light) !important',
-          color: 'var(--primary-dark)',
-          fontWeight: 900,
+        '& .MuiMenuItem-root.Mui-selected': {
+          backgroundColor: `${selectedColors.primarySoft} !important`,
+          color: selectedColors.primaryDark,
+          fontWeight: 950,
+        },
+
+        '& .MuiMenuItem-root.Mui-selected:hover': {
+          backgroundColor: `${selectedColors.primaryLight} !important`,
+        },
+
+        '&::-webkit-scrollbar': {
+          width: 8,
+        },
+
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: selectedColors.surfaceSoft,
+          borderRadius: 999,
+        },
+
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: selectedColors.primary,
+          borderRadius: 999,
+          border: `2px solid ${selectedColors.surfaceSoft}`,
+        },
+
+        '&::-webkit-scrollbar-thumb:hover': {
+          backgroundColor: selectedColors.primaryDark,
         },
       },
     },
@@ -462,7 +536,7 @@ export default function ProvinceSidePanel({
               variant="subtitle2"
               sx={{
                 fontWeight: 950,
-                color: 'var(--text-heading)',
+                color: selectedColors.textHeading,
                 mb: 0.5,
               }}
             >
@@ -473,7 +547,7 @@ export default function ProvinceSidePanel({
               variant="caption"
               sx={{
                 display: 'block',
-                color: 'var(--text-muted)',
+                color: selectedColors.textMuted,
                 fontWeight: 800,
                 mb: 1.5,
               }}
@@ -494,6 +568,8 @@ export default function ProvinceSidePanel({
                   labelId={`${hoveredItem.id}-start-month-label`}
                   label="Start Month"
                   value={monthRanges[hoveredItem.id]?.startMonth || ''}
+                  onOpen={handleSelectOpen}
+                  onClose={handleSelectClose}
                   onChange={(event) =>
                     onMonthRangeChange(
                       hoveredItem.id,
@@ -524,6 +600,8 @@ export default function ProvinceSidePanel({
                   labelId={`${hoveredItem.id}-end-month-label`}
                   label="End Month"
                   value={monthRanges[hoveredItem.id]?.endMonth || ''}
+                  onOpen={handleSelectOpen}
+                  onClose={handleSelectClose}
                   onChange={(event) =>
                     onMonthRangeChange(
                       hoveredItem.id,
@@ -545,7 +623,7 @@ export default function ProvinceSidePanel({
               <Typography
                 variant="caption"
                 sx={{
-                  color: 'var(--text-muted)',
+                  color: selectedColors.textMuted,
                   fontWeight: 700,
                   lineHeight: 1.5,
                 }}
