@@ -15,7 +15,7 @@ import dashboardConfig from '../config/dashboardConfig';
 
 export default function ForecastSalesChart({ data }) {
   const { forecastSales } = dashboardConfig.charts;
-  const { gridDash, actualColor, forecastColor } = dashboardConfig.chartStyles;
+  const { gridDash } = dashboardConfig.chartStyles;
 
   return (
     <Card
