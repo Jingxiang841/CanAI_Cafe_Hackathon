@@ -14,7 +14,7 @@ import dashboardConfig from '../config/dashboardConfig';
 
 export default function SalesTrendChart({ data }) {
   const { salesTrend } = dashboardConfig.charts;
-  const { gridDash, salesColor } = dashboardConfig.chartStyles;
+  const { gridDash } = dashboardConfig.chartStyles;
 
   return (
     <Card

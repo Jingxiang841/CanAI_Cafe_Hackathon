@@ -121,7 +121,7 @@ const dashboardConfig = {
       title: 'Sales Trends',
       xKey: 'month',
       yKey: 'sales',
-      lineName: 'Sales',
+      lineName: 'Revenue',
     },
 
     orderTypePerformance: {
@@ -134,8 +134,8 @@ const dashboardConfig = {
     productPerformance: {
       title: 'Product Performance',
       nameKey: 'product',
-      valueKey: 'orders',
-      barName: 'Orders',
+      valueKey: 'quantity',
+      barName: 'Quantity Sold',
     },
 
     forecastSales: {

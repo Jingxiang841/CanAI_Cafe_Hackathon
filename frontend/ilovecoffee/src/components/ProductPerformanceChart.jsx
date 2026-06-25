@@ -14,7 +14,7 @@ import dashboardConfig from '../config/dashboardConfig';
 
 export default function ProductPerformanceChart({ data }) {
   const { productPerformance } = dashboardConfig.charts;
-  const { gridDash, productColor } = dashboardConfig.chartStyles;
+  const { gridDash } = dashboardConfig.chartStyles;
 
   return (
     <Card
