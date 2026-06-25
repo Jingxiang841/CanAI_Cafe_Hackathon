@@ -72,7 +72,7 @@ export default function ProductPerformanceChart({ data }) {
               <Bar
                 dataKey={productPerformance.valueKey}
                 name={productPerformance.barName}
-                fill={productColor}
+                fill="var(--chart-product)"
                 radius={[10, 10, 0, 0]}
                 isAnimationActive
                 animationDuration={900}

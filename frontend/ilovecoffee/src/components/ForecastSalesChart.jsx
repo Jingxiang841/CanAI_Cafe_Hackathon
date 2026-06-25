@@ -76,7 +76,7 @@ export default function ForecastSalesChart({ data }) {
                 type="monotone"
                 dataKey={forecastSales.actualKey}
                 name={forecastSales.actualName}
-                stroke={actualColor}
+                stroke="var(--chart-actual)"
                 strokeWidth={3}
                 connectNulls
                 isAnimationActive
@@ -88,7 +88,7 @@ export default function ForecastSalesChart({ data }) {
                 type="monotone"
                 dataKey={forecastSales.forecastKey}
                 name={forecastSales.forecastName}
-                stroke={forecastColor}
+                stroke="var(--chart-forecast)"
                 strokeWidth={3}
                 strokeDasharray="6 6"
                 isAnimationActive
