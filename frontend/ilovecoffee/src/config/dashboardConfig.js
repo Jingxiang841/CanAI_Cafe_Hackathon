@@ -145,6 +145,20 @@ const dashboardConfig = {
       forecastKey: 'forecast',
       actualName: 'Actual',
       forecastName: 'Forecast',
+      rangeOptions: [
+        {
+          label: '3 Months',
+          value: 3,
+        },
+        {
+          label: '6 Months',
+          value: 6,
+        },
+        {
+          label: '12 Months',
+          value: 12,
+        },
+      ],
     },
 
     recommendations: {
