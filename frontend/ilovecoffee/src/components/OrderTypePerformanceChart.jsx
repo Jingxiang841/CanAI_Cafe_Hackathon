@@ -72,16 +72,35 @@ export default function OrderTypePerformanceChart({ data }) {
                 dataKey={orderTypePerformance.nameKey}
                 width={100}
               />
-              <Tooltip />
-              <Bar
-                dataKey={orderTypePerformance.valueKey}
-                name={orderTypePerformance.barName}
-                fill="var(--chart-order-type)"
-                radius={[0, 8, 8, 0]}
-                isAnimationActive
-                animationDuration={900}
-                animationEasing="ease-out"
-              />
+              <Tooltip
+              cursor={false}
+              contentStyle={{
+                borderRadius: '10px',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text-heading)',
+                boxShadow: 'var(--shadow-md)',
+                fontWeight: 700,
+              }}
+              labelStyle={{
+                color: 'var(--text-heading)',
+                fontWeight: 900,
+              }}
+            />
+            <Bar
+              dataKey={orderTypePerformance.valueKey}
+              name={orderTypePerformance.barName}
+              fill="var(--chart-order-type)"
+              radius={[0, 8, 8, 0]}
+              activeBar={{
+                fill: 'var(--primary)',
+                stroke: 'var(--primary-dark)',
+                strokeWidth: 2,
+              }}
+              isAnimationActive
+              animationDuration={900}
+              animationEasing="ease-out"
+            />
             </BarChart>
           </ResponsiveContainer>
         </Box>
