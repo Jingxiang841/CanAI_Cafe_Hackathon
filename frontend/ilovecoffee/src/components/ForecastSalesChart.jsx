@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 
 import {
+  Alert,
   Box,
   Button,
   ButtonGroup,
   Card,
   CardContent,
+  CircularProgress,
   Typography,
 } from '@mui/material';
 
@@ -42,7 +44,12 @@ function EndLineLabel({ x, y, index, dataLength, label, color }) {
   );
 }
 
-export default function ForecastSalesChart({ data }) {
+export default function ForecastSalesChart({
+  data,
+  isForecastLoading = false,
+  forecastErrorMessage = '',
+  isForecastEmpty = false,
+}) {
   const { forecastSales } = dashboardConfig.charts;
   const { gridDash } = dashboardConfig.chartStyles;
 
@@ -61,7 +68,7 @@ export default function ForecastSalesChart({ data }) {
     const maxValue = Math.max(...values, 0);
     const paddedMax = maxValue * 1.18;
 
-    return Math.ceil(paddedMax / 1000) * 1000;
+    return Math.max(Math.ceil(paddedMax / 1000) * 1000, 100);
   }, [chartData, forecastSales.actualKey, forecastSales.forecastKey]);
 
   const actualColor = '#22c55e';
@@ -177,24 +184,69 @@ export default function ForecastSalesChart({ data }) {
           </ButtonGroup>
         </Box>
 
-        <Box
-          sx={{
-            height: {
-              xs: 330,
-              md: dashboardConfig.layout.smallChartHeight,
-            },
-          }}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={chartData}
-              margin={{
-                top: 36,
-                right: 70,
-                bottom: 10,
-                left: 5,
-              }}
-            >
+        {isForecastLoading && (
+          <Box
+            sx={{
+              height: {
+                xs: 330,
+                md: dashboardConfig.layout.smallChartHeight,
+              },
+              display: 'grid',
+              placeItems: 'center',
+              gap: 1.5,
+            }}
+          >
+            <CircularProgress sx={{ color: 'var(--primary)' }} />
+            <Typography sx={{ color: 'var(--text-muted)', fontWeight: 700 }}>
+              Loading forecast data...
+            </Typography>
+          </Box>
+        )}
+
+        {!isForecastLoading && forecastErrorMessage && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {forecastErrorMessage}
+          </Alert>
+        )}
+
+        {!isForecastLoading && !forecastErrorMessage && isForecastEmpty && (
+          <Box
+            sx={{
+              height: {
+                xs: 330,
+                md: dashboardConfig.layout.smallChartHeight,
+              },
+              display: 'grid',
+              placeItems: 'center',
+              textAlign: 'center',
+              px: 2,
+            }}
+          >
+            <Typography sx={{ color: 'var(--text-muted)', fontWeight: 700 }}>
+              No forecast prediction data available for this selection.
+            </Typography>
+          </Box>
+        )}
+
+        {!isForecastLoading && !forecastErrorMessage && !isForecastEmpty && (
+          <Box
+            sx={{
+              height: {
+                xs: 330,
+                md: dashboardConfig.layout.smallChartHeight,
+              },
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={chartData}
+                margin={{
+                  top: 36,
+                  right: 70,
+                  bottom: 10,
+                  left: 5,
+                }}
+              >
               <CartesianGrid strokeDasharray={gridDash} />
 
               <XAxis
@@ -317,9 +369,10 @@ export default function ForecastSalesChart({ data }) {
                   )}
                 />
               </Line>
-            </LineChart>
-          </ResponsiveContainer>
-        </Box>
+              </LineChart>
+            </ResponsiveContainer>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

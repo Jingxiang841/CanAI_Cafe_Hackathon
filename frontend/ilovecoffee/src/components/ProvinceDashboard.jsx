@@ -10,7 +10,11 @@ import {
 } from '@mui/material';
 
 import dashboardConfig from '../config/dashboardConfig';
-import { fetchTransactions } from '../mockApi/cafeSalesMockApi';
+import {
+  fetchOverallForecastPredictions,
+  fetchProvinceForecastPredictions,
+  fetchTransactions,
+} from '../mockApi/cafeSalesMockApi';
 
 import ForecastSalesChart from './ForecastSalesChart';
 import MetricCard from './MetricCard';
@@ -39,47 +43,19 @@ const monthFromDate = (dateValue) => {
   return dateValue.slice(5, 7);
 };
 
-const nextMonthValue = (monthValue) => {
-  const next = Number(monthValue) + 1;
+const aggregateForecastByMonth = (rows) => {
+  const byMonth = new Map();
 
-  if (next > 12) {
-    return '01';
-  }
+  rows.forEach((row) => {
+    if (!row.month) {
+      return;
+    }
 
-  return String(next).padStart(2, '0');
-};
-
-const buildForecastSales = (salesTrend) => {
-  if (!salesTrend.length) {
-    return [];
-  }
-
-  const history = salesTrend.map((entry) => ({
-    month: entry.month,
-    actual: entry.sales,
-    forecast: null,
-  }));
-
-  const recentValues = salesTrend.slice(-3).map((entry) => entry.sales);
-  const baseline =
-    recentValues.reduce((sum, value) => sum + value, 0) / recentValues.length;
-
-  let rollingMonth = salesTrend[salesTrend.length - 1].monthValue;
-
-  const projected = Array.from({ length: 3 }, (_, index) => {
-    rollingMonth = nextMonthValue(rollingMonth);
-
-    const growthMultiplier = 1 + (index + 1) * 0.05;
-    const forecast = Number((baseline * growthMultiplier).toFixed(2));
-
-    return {
-      month: MONTH_LABELS[rollingMonth],
-      actual: null,
-      forecast,
-    };
+    const current = byMonth.get(row.month) || 0;
+    byMonth.set(row.month, current + row.predictedRevenue);
   });
 
-  return [...history, ...projected];
+  return byMonth;
 };
 
 const buildRecommendations = ({
@@ -160,6 +136,13 @@ export default function ProvinceDashboard({
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [overallForecastPredictions, setOverallForecastPredictions] = useState(
+    []
+  );
+  const [provinceForecastPredictions, setProvinceForecastPredictions] =
+    useState([]);
+  const [isForecastLoading, setIsForecastLoading] = useState(true);
+  const [forecastErrorMessage, setForecastErrorMessage] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -190,6 +173,45 @@ export default function ProvinceDashboard({
     };
 
     loadTransactions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadForecastData = async () => {
+      setIsForecastLoading(true);
+      setForecastErrorMessage('');
+
+      try {
+        const [overallForecastData, provinceForecastData] = await Promise.all([
+          fetchOverallForecastPredictions(),
+          fetchProvinceForecastPredictions(),
+        ]);
+
+        if (isMounted) {
+          setOverallForecastPredictions(overallForecastData);
+          setProvinceForecastPredictions(provinceForecastData);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setForecastErrorMessage(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load forecast prediction data.'
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsForecastLoading(false);
+        }
+      }
+    };
+
+    loadForecastData();
 
     return () => {
       isMounted = false;
@@ -304,7 +326,39 @@ export default function ProvinceDashboard({
       }))
       .sort((a, b) => b.quantity - a.quantity);
 
-    const forecastSales = buildForecastSales(salesTrend);
+    const activeForecastRows =
+      selectedProvince.id === dashboardConfig.overall.id
+        ? overallForecastPredictions
+        : provinceForecastPredictions.filter(
+            (row) => row.province === selectedProvince.label
+          );
+
+    const forecastMap = aggregateForecastByMonth(activeForecastRows);
+
+    const forecastMonths = dashboardConfig.monthFilter.availableMonths
+      .map((monthEntry) => monthEntry.value)
+      .filter((monthValue) => {
+        const startMonth = selectedMonthRange?.startMonth;
+        const endMonth = selectedMonthRange?.endMonth;
+
+        if (startMonth && endMonth) {
+          if (monthValue < startMonth || monthValue > endMonth) {
+            return false;
+          }
+        }
+
+        return salesMap.has(monthValue) || forecastMap.has(monthValue);
+      });
+
+    const forecastSales = forecastMonths.map((monthValue) => ({
+      month: MONTH_LABELS[monthValue],
+      actual: salesMap.has(monthValue)
+        ? Number(salesMap.get(monthValue).toFixed(2))
+        : null,
+      forecast: forecastMap.has(monthValue)
+        ? Number(forecastMap.get(monthValue).toFixed(2))
+        : null,
+    }));
 
     const recommendations = buildRecommendations({
       allTransactions: transactions,
@@ -322,8 +376,17 @@ export default function ProvinceDashboard({
       productPerformance,
       forecastSales,
       recommendations,
+      hasForecastRows: activeForecastRows.length > 0,
     };
-  }, [filteredTransactions, selectedMonthRange?.endMonth, selectedMonthRange?.startMonth, selectedProvince, transactions]);
+  }, [
+    filteredTransactions,
+    overallForecastPredictions,
+    provinceForecastPredictions,
+    selectedMonthRange?.endMonth,
+    selectedMonthRange?.startMonth,
+    selectedProvince,
+    transactions,
+  ]);
 
   const getMonthLabel = (monthValue) => {
     const month = dashboardConfig.monthFilter.availableMonths.find(
@@ -570,7 +633,12 @@ export default function ProvinceDashboard({
           >
             <ProductPerformanceChart data={dashboardData.productPerformance} />
 
-            <ForecastSalesChart data={dashboardData.forecastSales} />
+            <ForecastSalesChart
+              data={dashboardData.forecastSales}
+              isForecastLoading={isForecastLoading}
+              forecastErrorMessage={forecastErrorMessage}
+              isForecastEmpty={!dashboardData.hasForecastRows}
+            />
           </Box>
         </>
       )}

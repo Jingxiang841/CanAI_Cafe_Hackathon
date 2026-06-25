@@ -1,4 +1,6 @@
 import csvDataUrl from '../data/cleaned_cafe_sales.csv?url';
+import overallForecastDataUrl from '../data/overall_forecast_2024_daily.csv?url';
+import provinceForecastDataUrl from '../data/province_forecast_2024_daily.csv?url';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -94,6 +96,30 @@ const parseCsvText = (text) => {
   });
 };
 
+const parseCsvRows = (text) => {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2) {
+    return [];
+  }
+
+  const headers = lines[0].split(',').map((header) => header.trim());
+
+  return lines.slice(1).map((line) => {
+    const values = line.split(',');
+    const row = {};
+
+    headers.forEach((header, index) => {
+      row[header] = values[index]?.trim() || '';
+    });
+
+    return row;
+  });
+};
+
 const monthFromIsoDate = (dateValue) => {
   if (!dateValue) {
     return null;
@@ -140,6 +166,49 @@ export async function fetchTransactions() {
 
   const text = await response.text();
   return parseCsvText(text);
+}
+
+export async function fetchOverallForecastPredictions() {
+  const response = await fetch(overallForecastDataUrl);
+
+  if (!response.ok) {
+    throw new Error(
+      `Unable to load overall forecast data (${response.status})`
+    );
+  }
+
+  const text = await response.text();
+  const rows = parseCsvRows(text);
+
+  return rows.map((row) => ({
+    date: normalizeDate(row['Transaction Date']),
+    month: String(row.Month || '').padStart(2, '0'),
+    year: String(row.Year || ''),
+    predictedRevenue: toNumber(row.Predicted_Overall_Revenue),
+    source: row,
+  }));
+}
+
+export async function fetchProvinceForecastPredictions() {
+  const response = await fetch(provinceForecastDataUrl);
+
+  if (!response.ok) {
+    throw new Error(
+      `Unable to load province forecast data (${response.status})`
+    );
+  }
+
+  const text = await response.text();
+  const rows = parseCsvRows(text);
+
+  return rows.map((row) => ({
+    date: normalizeDate(row['Transaction Date']),
+    month: String(row.Month || '').padStart(2, '0'),
+    year: String(row.Year || ''),
+    province: normalizeProvince(row.Province),
+    predictedRevenue: toNumber(row.Predicted_Province_Revenue),
+    source: row,
+  }));
 }
 
 export async function fetchTotalSpentByProvince(filters = {}) {
