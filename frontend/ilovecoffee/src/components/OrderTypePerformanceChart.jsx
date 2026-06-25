@@ -14,7 +14,7 @@ import dashboardConfig from '../config/dashboardConfig';
 
 export default function OrderTypePerformanceChart({ data }) {
   const { orderTypePerformance } = dashboardConfig.charts;
-  const { gridDash, orderTypeColor } = dashboardConfig.chartStyles;
+  const { gridDash } = dashboardConfig.chartStyles;
 
   return (
     <Card
@@ -23,7 +23,7 @@ export default function OrderTypePerformanceChart({ data }) {
         height: '100%',
         border: '1px solid var(--border)',
         backgroundColor: 'var(--surface)',
-        borderRadius: '14px',
+        borderRadius: 2,
         boxShadow: 'var(--shadow-sm)',
         animation: 'fadeSlideUp 0.5s ease both',
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -76,7 +76,7 @@ export default function OrderTypePerformanceChart({ data }) {
               <Bar
                 dataKey={orderTypePerformance.valueKey}
                 name={orderTypePerformance.barName}
-                fill={orderTypeColor}
+                fill="var(--chart-order-type)"
                 radius={[0, 8, 8, 0]}
                 isAnimationActive
                 animationDuration={900}

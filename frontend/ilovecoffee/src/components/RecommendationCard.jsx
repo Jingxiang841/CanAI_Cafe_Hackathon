@@ -53,7 +53,7 @@ export default function RecommendationCard({ recommendations }) {
             sx={{
               width: 38,
               height: 38,
-              borderRadius: '50%',
+              borderRadius: 2,
               backgroundColor: '#fff7ed',
               display: 'grid',
               placeItems: 'center',
@@ -94,7 +94,7 @@ export default function RecommendationCard({ recommendations }) {
                   sx={{
                     width: 7,
                     height: 7,
-                    borderRadius: '50%',
+                    borderRadius: 2,
                     backgroundColor: 'var(--primary)',
                   }}
                 />

@@ -14,6 +14,8 @@ import SalesTrendChart from './SalesTrendChart';
 export default function ProvinceDashboard({
   selectedProvinceId,
   selectedMonthRange,
+  selectedDrink,
+  onChangeDrink,
 }) {
   const fallbackProvinceId = dashboardConfig.provinces[0].id;
 
@@ -112,6 +114,29 @@ export default function ProvinceDashboard({
             gap: 1,
           }}
         >
+          {selectedDrink && (
+            <Chip
+              label={`Selected: ${selectedDrink.name}`}
+              onDelete={onChangeDrink}
+              sx={{
+                backgroundColor: 'var(--primary-light)',
+                color: 'var(--text-heading)',
+                fontWeight: 900,
+                height: 34,
+                borderRadius: '999px',
+                border: '1px solid var(--border)',
+
+                '& .MuiChip-deleteIcon': {
+                  color: 'var(--primary)',
+
+                  '&:hover': {
+                    color: 'var(--primary-dark)',
+                  },
+                },
+              }}
+            />
+          )}
+
           <Chip
             label={selectedProvince.label}
             sx={{
@@ -144,9 +169,11 @@ export default function ProvinceDashboard({
           gridTemplateColumns: {
             xs: '1fr',
             md: 'repeat(2, minmax(0, 1fr))',
+            xl: '1fr 1fr 1.35fr',
           },
           gap: dashboardConfig.layout.dashboardGap,
           mb: dashboardConfig.layout.dashboardGap,
+          alignItems: 'stretch',
         }}
       >
         <MetricCard
@@ -159,6 +186,8 @@ export default function ProvinceDashboard({
           label={dashboardConfig.cards.orders.label}
           value={dashboardData.metrics.orders}
         />
+
+        <RecommendationCard recommendations={dashboardData.recommendations} />
       </Box>
 
       <Box
@@ -170,10 +199,14 @@ export default function ProvinceDashboard({
           },
           gap: dashboardConfig.layout.dashboardGap,
           mb: dashboardConfig.layout.dashboardGap,
+          alignItems: 'stretch',
         }}
       >
         <SalesTrendChart data={dashboardData.salesTrend} />
-        <OrderTypePerformanceChart data={dashboardData.orderTypePerformance} />
+
+        <OrderTypePerformanceChart
+          data={dashboardData.orderTypePerformance}
+        />
       </Box>
 
       <Box
@@ -182,14 +215,14 @@ export default function ProvinceDashboard({
           gridTemplateColumns: {
             xs: '1fr',
             lg: '1fr 1fr',
-            xl: '1fr 1fr 1fr',
           },
           gap: dashboardConfig.layout.dashboardGap,
+          alignItems: 'stretch',
         }}
       >
         <ProductPerformanceChart data={dashboardData.productPerformance} />
+
         <ForecastSalesChart data={dashboardData.forecastSales} />
-        <RecommendationCard recommendations={dashboardData.recommendations} />
       </Box>
     </Box>
   );

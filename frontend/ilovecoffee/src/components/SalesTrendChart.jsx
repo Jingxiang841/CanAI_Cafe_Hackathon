@@ -66,7 +66,7 @@ export default function SalesTrendChart({ data }) {
                 type="monotone"
                 dataKey={salesTrend.yKey}
                 name={salesTrend.lineName}
-                stroke={salesColor}
+                stroke="var(--chart-sales)"
                 strokeWidth={3}
                 dot={{ r: 4 }}
                 activeDot={{ r: 7 }}
