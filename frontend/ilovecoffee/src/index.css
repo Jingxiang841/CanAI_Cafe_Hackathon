@@ -1,0 +1,184 @@
+:root {
+  --page-bg: #f6f0e8;
+  --surface: #ffffff;
+  --surface-soft: #fbf7f2;
+
+  --sidebar-bg: #ead8c1;
+  --sidebar-border: #d4b793;
+
+  --border: #e2d4c5;
+
+  --text-heading: #10213f;
+  --text-main: #344054;
+  --text-muted: #667085;
+
+  --primary: #9a642b;
+  --primary-dark: #744817;
+  --primary-soft: #f0ddc5;
+  --primary-light: #fbefe0;
+
+  --accent-blue: #2f64d6;
+  --accent-green: #16a34a;
+  --accent-orange: #f97316;
+  --warning: #f59e0b;
+
+  --shadow-sm: 0 4px 12px rgba(63, 42, 23, 0.08);
+  --shadow-md: 0 12px 30px rgba(63, 42, 23, 0.12);
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: var(--page-bg);
+  color: var(--text-main);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(154, 100, 43, 0.14), transparent 28%),
+    linear-gradient(135deg, #f7efe6 0%, #f6f0e8 45%, #f4f6f8 100%);
+}
+
+/* ----------------------------- */
+/* Animations */
+/* ----------------------------- */
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes softPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes landingExit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.98) translateY(-18px);
+    filter: blur(6px);
+  }
+}
+
+@keyframes dashboardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes handwrittenCursor {
+  0%,
+  45% {
+    border-color: currentColor;
+  }
+
+  46%,
+  100% {
+    border-color: transparent;
+  }
+}
+
+@keyframes handwrittenFloat {
+  0% {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateY(-3px) rotate(1deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+}
+
+@keyframes selectedCoffeePop {
+  0% {
+    transform: translateY(-6px) scale(1);
+  }
+
+  45% {
+    transform: translateY(-6px) scale(1.035);
+  }
+
+  100% {
+    transform: translateY(-6px) scale(1.015);
+  }
+}
+
+/* ----------------------------- */
+/* Soft Scrollbar */
+/* ----------------------------- */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(154, 100, 43, 0.45) rgba(246, 240, 232, 0.9);
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: rgba(246, 240, 232, 0.9);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(154, 100, 43, 0.45);
+  border-radius: 999px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(154, 100, 43, 0.75);
+}
