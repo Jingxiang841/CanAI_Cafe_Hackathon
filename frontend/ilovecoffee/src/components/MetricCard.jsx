@@ -62,7 +62,7 @@ export default function MetricCard({ label, value, prefix = '', suffix = '' }) {
             sx={{
               width: 34,
               height: 34,
-              borderRadius: '50%',
+              borderRadius: 2,
               display: 'grid',
               placeItems: 'center',
               backgroundColor: 'var(--primary-light)',
