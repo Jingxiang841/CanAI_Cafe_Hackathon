@@ -1,5 +1,6 @@
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -14,7 +15,10 @@ import dashboardConfig from '../config/dashboardConfig';
 
 export default function SalesTrendChart({ data }) {
   const { salesTrend } = dashboardConfig.charts;
-  const { gridDash, salesColor } = dashboardConfig.chartStyles;
+  const { gridDash } = dashboardConfig.chartStyles;
+
+  const formatCurrency = (value) =>
+    `$${Number(value || 0).toLocaleString('en-CA')}`;
 
   return (
     <Card
@@ -47,7 +51,7 @@ export default function SalesTrendChart({ data }) {
           variant="h6"
           sx={{
             fontWeight: 950,
-            mb: 2,
+            mb: 0.5,
             color: 'var(--text-heading)',
             letterSpacing: '-0.03em',
           }}
@@ -55,21 +59,108 @@ export default function SalesTrendChart({ data }) {
           {salesTrend.title}
         </Typography>
 
-        <Box sx={{ height: { xs: 340, md: dashboardConfig.layout.chartHeight } }}>
+        <Typography
+          variant="caption"
+          sx={{
+            display: 'block',
+            color: 'var(--text-muted)',
+            fontWeight: 700,
+            mb: 2,
+          }}
+        >
+          Monthly revenue shown in dollars
+        </Typography>
+
+        <Box
+          sx={{
+            height: {
+              xs: 340,
+              md: dashboardConfig.layout.chartHeight,
+            },
+          }}
+        >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart
+              data={data}
+              margin={{
+                top: 10,
+                right: 20,
+                bottom: 8,
+                left: 8,
+              }}
+            >
               <CartesianGrid strokeDasharray={gridDash} />
-              <XAxis dataKey={salesTrend.xKey} />
-              <YAxis />
-              <Tooltip />
+
+              <XAxis
+                dataKey={salesTrend.xKey}
+                tick={{
+                  fill: 'var(--text-muted)',
+                  fontWeight: 700,
+                }}
+                axisLine={{
+                  stroke: 'var(--border)',
+                }}
+                tickLine={false}
+              />
+
+              <YAxis
+                tickFormatter={formatCurrency}
+                tick={{
+                  fill: 'var(--text-muted)',
+                  fontWeight: 700,
+                }}
+                axisLine={{
+                  stroke: 'var(--border)',
+                }}
+                tickLine={false}
+              />
+
+              <Tooltip
+                cursor={false}
+                formatter={(value) => [formatCurrency(value), salesTrend.lineName]}
+                contentStyle={{
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  color: 'var(--text-heading)',
+                  boxShadow: 'var(--shadow-md)',
+                  fontWeight: 700,
+                }}
+                labelStyle={{
+                  color: 'var(--text-heading)',
+                  fontWeight: 900,
+                }}
+              />
+
+              <Legend
+                verticalAlign="bottom"
+                formatter={(value) => (
+                  <span
+                    style={{
+                      color: 'var(--text-heading)',
+                      fontWeight: 800,
+                    }}
+                  >
+                    {value}
+                  </span>
+                )}
+              />
+
               <Line
                 type="monotone"
                 dataKey={salesTrend.yKey}
                 name={salesTrend.lineName}
-                stroke={salesColor}
+                stroke="var(--chart-sales)"
                 strokeWidth={3}
-                dot={{ r: 4 }}
-                activeDot={{ r: 7 }}
+                dot={{
+                  r: 4,
+                  strokeWidth: 2,
+                  fill: 'var(--surface)',
+                  stroke: 'var(--chart-sales)',
+                }}
+                activeDot={{
+                  r: 7,
+                }}
                 isAnimationActive
                 animationDuration={900}
                 animationEasing="ease-out"

@@ -121,7 +121,7 @@ const dashboardConfig = {
       title: 'Sales Trends',
       xKey: 'month',
       yKey: 'sales',
-      lineName: 'Sales',
+      lineName: 'Revenue',
     },
 
     orderTypePerformance: {
@@ -134,8 +134,8 @@ const dashboardConfig = {
     productPerformance: {
       title: 'Product Performance',
       nameKey: 'product',
-      valueKey: 'orders',
-      barName: 'Orders',
+      valueKey: 'quantity',
+      barName: 'Quantity Sold',
     },
 
     forecastSales: {
@@ -145,6 +145,20 @@ const dashboardConfig = {
       forecastKey: 'forecast',
       actualName: 'Actual',
       forecastName: 'Forecast',
+      rangeOptions: [
+        {
+          label: '3 Months',
+          value: 3,
+        },
+        {
+          label: '6 Months',
+          value: 6,
+        },
+        {
+          label: '12 Months',
+          value: 12,
+        },
+      ],
     },
 
     recommendations: {
